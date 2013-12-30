@@ -4,28 +4,19 @@ import com.rabbitmq.client.ConnectionFactory
 
 object MessageSender {
   def main(args: Array[String]) {
-    val userName = "guest"
-    val password = "guest"
     val hostName = "localhost"
-    val exchangeName = "testChannel"
-    val routingKey = "routingKey"
-    val portNumber = 5672
+    val queueName = "testqueue"
     val factory = new ConnectionFactory()
-    factory.setUsername(userName)
-    factory.setPassword(password)
-    //factory.setVirtualHost(virtualHost)
     factory.setHost(hostName)
-    factory.setPort(portNumber)
-    val conn = factory.newConnection()
-    println("Connection created!!!!!!")
+    val connection = factory.newConnection()
+    val channel = connection.createChannel()
 
-    val channel = conn.createChannel()
-    channel.exchangeDeclare(exchangeName, "direct", true)
-    val queueName = channel.queueDeclare().getQueue()
-    channel.queueBind(queueName, exchangeName, routingKey)
+    channel.queueDeclare(queueName, false, false, false, null)
+    val message = "Hello World!"
+    channel.basicPublish("", queueName, null, message.getBytes())
+    System.out.println(" [x] Sent '" + message + "'")
 
-    println("Publishing the hello world message...")
-    val messageBodyBytes = "Hello, world!".getBytes()
-    channel.basicPublish(exchangeName, routingKey, null, messageBodyBytes)
+    channel.close()
+    connection.close()
   }
 }
