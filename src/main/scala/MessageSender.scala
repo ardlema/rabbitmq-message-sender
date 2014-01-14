@@ -11,12 +11,18 @@ object MessageSender {
     val connection = factory.newConnection()
     val channel = connection.createChannel()
 
-    channel.queueDeclare(queueName, false, false, false, null)
-    val message = "Hello World!"
+    channel.queueDeclare(queueName, false, false, false, getPropsWithMessageTtlSetTo4Minutes())
+    val message = "Hello world!!"
     channel.basicPublish("", queueName, null, message.getBytes())
-    System.out.println(" [x] Sent '" + message + "'")
+    println(" [x] Sent '" + message + "'")
 
     channel.close()
     connection.close()
+  }
+
+  def getPropsWithMessageTtlSetTo4Minutes() = {
+    val props = new java.util.HashMap[String, Object]()
+    props.put("x-message-ttl", java.lang.Integer.valueOf(240000))
+    props
   }
 }
